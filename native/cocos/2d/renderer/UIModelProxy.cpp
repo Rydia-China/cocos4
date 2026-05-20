@@ -27,12 +27,6 @@
 #include "core/assets/RenderingSubMesh.h"
 
 namespace cc {
-namespace {
-bool isModelDrawInfo(const RenderDrawInfo* drawInfo) {
-    return drawInfo != nullptr && drawInfo->getEnumDrawInfoType() == RenderDrawInfoType::MODEL;
-}
-} // namespace
-
 UIModelProxy::UIModelProxy() {
     _device = Root::getInstance()->getDevice();
 }
@@ -49,18 +43,16 @@ void UIModelProxy::initModel(Node* node) {
 }
 
 void UIModelProxy::activeSubModels() {
-    if (_model == nullptr || _node == nullptr) return;
+    if (_model == nullptr) return;
     auto* entity = static_cast<RenderEntity*>(_node->getUserData());
-    if (entity == nullptr) return;
-
-    auto drawInfoSize = entity->getRenderDrawInfosSize();
+    auto drawInfoSize = entity->getDynamicRenderDrawInfos().size();
     auto subModelSize = _model->getSubModels().size();
     if (drawInfoSize > subModelSize) {
         for (size_t i = subModelSize; i < drawInfoSize; i++) {
             if (_model->getSubModels().size() <= i) {
-                RenderDrawInfo* drawInfo = entity->getRenderDrawInfoAt(static_cast<uint32_t>(i));
-                if (!isModelDrawInfo(drawInfo)) {
-                    continue;
+                RenderDrawInfo* drawInfo = entity->getDynamicRenderDrawInfo(static_cast<uint32_t>(i));
+                if (drawInfo == nullptr) {
+                    return;
                 }
 
                 auto* vertexBuffer = _device->createBuffer({
@@ -89,21 +81,12 @@ void UIModelProxy::activeSubModels() {
 }
 
 void UIModelProxy::uploadData() {
-    if (_model == nullptr || _node == nullptr) return;
     auto* entity = static_cast<RenderEntity*>(_node->getUserData());
-    if (entity == nullptr) return;
-
-    const auto drawInfoSize = entity->getRenderDrawInfosSize();
+    const auto& drawInfos = entity->getDynamicRenderDrawInfos();
     const auto& subModelList = _model->getSubModels();
-    RenderDrawInfo* firstModelDrawInfo = nullptr;
-    for (size_t i = 0; i < drawInfoSize && i < subModelList.size(); i++) {
-        auto* drawInfo = entity->getRenderDrawInfoAt(static_cast<uint32_t>(i));
-        if (!isModelDrawInfo(drawInfo)) continue;
-        if (firstModelDrawInfo == nullptr) {
-            firstModelDrawInfo = drawInfo;
-        }
-
-        auto* ia = subModelList[i]->getInputAssembler();
+    for (size_t i = 0; i < drawInfos.size(); i++) {
+        auto* drawInfo = drawInfos[i];
+        auto* ia = subModelList.at(i)->getInputAssembler();
         if (drawInfo->getVertexOffset() <= 0 || drawInfo->getIndexOffset() <= 0) continue;
         gfx::BufferList vBuffers = ia->getVertexBuffers();
         if (!vBuffers.empty()) {
@@ -125,8 +108,8 @@ void UIModelProxy::uploadData() {
         // drawInfo->setModel(_model); // hack, render by model
     }
 
-    if (firstModelDrawInfo != nullptr) {
-        firstModelDrawInfo->setModel(_model);
+    if (!drawInfos.empty()) {
+        drawInfos[0]->setModel(_model);
     }
 }
 
@@ -163,17 +146,11 @@ void UIModelProxy::updateModels(scene::Model* model) {
 }
 
 void UIModelProxy::attachDrawInfo() {
-    if (_node == nullptr) return;
     auto* entity = static_cast<RenderEntity*>(_node->getUserData());
-    if (entity == nullptr) return;
-
-    auto drawInfoSize = entity->getRenderDrawInfosSize();
-    if (drawInfoSize != _models.size()) return;
-    for (size_t i = 0; i < drawInfoSize; i++) {
-        auto* drawInfo = entity->getRenderDrawInfoAt(static_cast<uint32_t>(i));
-        if (isModelDrawInfo(drawInfo)) {
-            drawInfo->setModel(_models[i]);
-        }
+    auto& drawInfos = entity->getDynamicRenderDrawInfos();
+    if (drawInfos.size() != _models.size()) return;
+    for (size_t i = 0; i < drawInfos.size(); i++) {
+        drawInfos[i]->setModel(_models[i]);
     }
 }
 
