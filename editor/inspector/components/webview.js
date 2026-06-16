@@ -9,7 +9,7 @@ exports.ready = function() {
     this.elements = {
         url: {
             ready(element) {
-                element.querySelector('ui-input[slot="content"]').placeholder = 'https://www.cocos.com/';
+                element.querySelector('ui-input[slot="content"]').placeholder = 'about:blank';
             },
         },
     };

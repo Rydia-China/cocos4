@@ -47,7 +47,7 @@ import type { WebViewImpl  } from './web-view-impl';
 @executeInEditMode
 export class WebView extends Component {
     @serializable
-    protected _url = 'https://cocos.com';
+    protected _url = 'about:blank';
 
     protected _impl: WebViewImpl | null = null;
 
