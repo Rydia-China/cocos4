@@ -96,6 +96,10 @@ module.exports = {
                         displayName: 'Underline Height',
                         tooltip: 'The underline\'s height.',
                     },
+                    'underlineStyle': {
+                        displayName: 'Underline Style',
+                        tooltip: 'The underline\'s style.',
+                    },
                     'enableOutline': {
                         displayName: 'Enable Outline',
                         tooltip: 'Whether outline is enabled.',

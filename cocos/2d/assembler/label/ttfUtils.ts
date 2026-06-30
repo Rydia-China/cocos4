@@ -65,6 +65,7 @@ export class TTFUtils {
         style.isBold = comp.isBold;
         style.isItalic = comp.isItalic;
         style.isUnderline = comp.isUnderline;
+        style.underlineStyle = comp.underlineStyle;
         style.underlineHeight = comp.underlineHeight;
 
         // outline// both

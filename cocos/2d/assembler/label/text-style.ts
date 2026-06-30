@@ -34,6 +34,7 @@ export class TextStyle {
     public isItalic = false; // ttf
     // under line // style
     public isUnderline = false; // ttf
+    public underlineStyle = 0; // ttf
     public underlineHeight = 1; // ttf
     // outline style
     public isOutlined = false; // both // ttf & char
@@ -74,6 +75,7 @@ export class TextStyle {
         this.isBold = false;
         this.isItalic = false;
         this.isUnderline = false;
+        this.underlineStyle = 0;
         this.underlineHeight = 1;
         this.isOutlined = false;
         this.outlineColor.set();

@@ -94,6 +94,10 @@ module.exports = {
                         displayName: '下划线高度',
                         tooltip: '下划线高度。',
                     },
+                    'underlineStyle': {
+                        displayName: '下划线样式',
+                        tooltip: '下划线样式。',
+                    },
                     'enableOutline': {
                         displayName: '启用描边',
                         tooltip: '是否启用描边。',

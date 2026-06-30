@@ -1343,6 +1343,7 @@ this._measureText(styleIndex) as unknown as (s: string) => number,
         label.isBold = false;
         label.isItalic = false;
         label.isUnderline = false;
+        label.underlineStyle = Label.UnderlineStyle.SOLID;
     }
 }
 

@@ -28,7 +28,7 @@ import { cclegacy, Color, Rect, Vec2 } from '../../../core';
 import { logID, warnID } from '../../../core/platform';
 import { SpriteFrame } from '../../assets';
 import { FontLetterDefinition } from '../../assets/bitmap-font';
-import { HorizontalTextAlignment, Overflow, VerticalTextAlignment } from '../../components/label';
+import { HorizontalTextAlignment, Overflow, UnderlineStyle, VerticalTextAlignment } from '../../components/label';
 import { CanvasPool, ISharedLabelData, shareLabelInfo } from './font-utils';
 import { TextOutputLayoutData, TextOutputRenderData } from './text-output-data';
 import { TextStyle } from './text-style';
@@ -55,6 +55,8 @@ const MAX_SIZE = 2048;
 const _BASELINE_OFFSET = getBaselineOffset();
 const _invisibleAlpha = (1 / 255).toFixed(3);
 const MAX_CALCULATION_NUM = 3;
+const UNDERLINE_DASH_MIN_LENGTH = 4;
+const UNDERLINE_DASH_MIN_GAP = 2;
 
 export interface IRenderData {
     x: number;
@@ -635,22 +637,39 @@ export class TextProcessing {
 
             // draw underline
             if (style.isUnderline) {
-                const _drawUnderlineWidth = measureText(parsedString[i]);
-                const _drawUnderlinePos = new Vec2();
+                const underlineWidth = measureText(parsedString[i]);
+                const underlinePos = new Vec2();
                 if (layout.horizontalAlign === HorizontalTextAlignment.RIGHT as number) {
-                    _drawUnderlinePos.x = startPosition.x - _drawUnderlineWidth;
+                    underlinePos.x = startPosition.x - underlineWidth;
                 } else if (layout.horizontalAlign === HorizontalTextAlignment.CENTER as number) {
-                    _drawUnderlinePos.x = startPosition.x - (_drawUnderlineWidth / 2);
+                    underlinePos.x = startPosition.x - (underlineWidth / 2);
                 } else {
-                    _drawUnderlinePos.x = startPosition.x;
+                    underlinePos.x = startPosition.x;
                 }
-                _drawUnderlinePos.y = drawTextPosY + style.actualFontSize / 8;
-                context.fillRect(_drawUnderlinePos.x, _drawUnderlinePos.y, _drawUnderlineWidth, style.underlineHeight * this._fontScale);
+                underlinePos.y = drawTextPosY + style.actualFontSize / 8;
+                this._drawUnderline(underlinePos, underlineWidth, style);
             }
         }
 
         if (isMultiple) {
             context.shadowColor = 'transparent';
+        }
+    }
+
+    private _drawUnderline (position: Vec2, width: number, style: TextStyle): void {
+        const context = this._context!;
+        const height = style.underlineHeight * this._fontScale;
+        if (width <= 0 || height <= 0) return;
+
+        if (style.underlineStyle !== UnderlineStyle.DASHED) {
+            context.fillRect(position.x, position.y, width, height);
+            return;
+        }
+
+        const dashLength = Math.max(height * 3, UNDERLINE_DASH_MIN_LENGTH * this._fontScale);
+        const dashGap = Math.max(height * 2, UNDERLINE_DASH_MIN_GAP * this._fontScale);
+        for (let offsetX = 0; offsetX < width; offsetX += dashLength + dashGap) {
+            context.fillRect(position.x + offsetX, position.y, Math.min(dashLength, width - offsetX), height);
         }
     }
 

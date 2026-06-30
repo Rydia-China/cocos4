@@ -167,6 +167,28 @@ export enum CacheMode {
 ccenum(CacheMode);
 
 /**
+ * @en Enum for underline style.
+ *
+ * @zh 下划线样式。
+ */
+export enum UnderlineStyle {
+    /**
+     * @en Solid underline.
+     *
+     * @zh 实线下划线。
+     */
+    SOLID = 0,
+    /**
+     * @en Dashed underline.
+     *
+     * @zh 虚线下划线。
+     */
+    DASHED = 1,
+}
+
+ccenum(UnderlineStyle);
+
+/**
  * @en
  * The Label Component.
  *
@@ -202,6 +224,12 @@ export class Label extends UIRenderer {
      * @zh 文本图集缓存类型。
      */
     public static CacheMode = CacheMode;
+    /**
+     * @en Enum for underline style.
+     *
+     * @zh 下划线样式。
+     */
+    public static UnderlineStyle = UnderlineStyle;
     /**
      * @deprecated since v3.7.0, this is an engine private interface that will be removed in the future.
      */
@@ -577,12 +605,28 @@ export class Label extends UIRenderer {
     }
 
     /**
+     * @en The style of underline.
+     * @zh 下划线样式。
+     */
+    @type(UnderlineStyle)
+    @visible(function (this: Label) { return this._isUnderline; })
+    @displayOrder(18)
+    get underlineStyle (): UnderlineStyle {
+        return this._underlineStyle;
+    }
+    set underlineStyle (value) {
+        if (this._underlineStyle === value) return;
+        this._underlineStyle = value;
+        this._markForUpdateRenderData();
+    }
+
+    /**
      * @en The height of underline.
      * @zh 下划线高度。
      */
     @visible(function (this: Label) { return this._isUnderline; })
     @editable
-    @displayOrder(18)
+    @displayOrder(19)
     get underlineHeight (): number {
         return this._underlineHeight;
     }
@@ -601,7 +645,7 @@ export class Label extends UIRenderer {
      **/
     @editable
     @visible(function (this: Label) { return !(this._font instanceof BitmapFont); })
-    @displayOrder(19)
+    @displayOrder(20)
     get enableOutline (): boolean {
         return this._enableOutline;
     }
@@ -620,7 +664,7 @@ export class Label extends UIRenderer {
      */
     @editable
     @visible(function (this: Label) { return this._enableOutline && !(this._font instanceof BitmapFont); })
-    @displayOrder(20)
+    @displayOrder(21)
     get outlineColor (): Color {
         return this._outlineColor;
     }
@@ -639,7 +683,7 @@ export class Label extends UIRenderer {
      */
     @editable
     @visible(function (this: Label) { return this._enableOutline && !(this._font instanceof BitmapFont); })
-    @displayOrder(21)
+    @displayOrder(22)
     get outlineWidth (): number {
         return this._outlineWidth;
     }
@@ -655,7 +699,7 @@ export class Label extends UIRenderer {
      */
     @editable
     @visible(function (this: Label) { return !(this._font instanceof BitmapFont) && (this.cacheMode !== CacheMode.CHAR); })
-    @displayOrder(22)
+    @displayOrder(23)
     get enableShadow (): boolean {
         return this._enableShadow;
     }
@@ -674,7 +718,7 @@ export class Label extends UIRenderer {
      */
     @editable
     @visible(function (this: Label) { return this._enableShadow && !(this._font instanceof BitmapFont) && (this.cacheMode !== CacheMode.CHAR); })
-    @displayOrder(23)
+    @displayOrder(24)
     get shadowColor (): Color {
         return this._shadowColor;
     }
@@ -693,7 +737,7 @@ export class Label extends UIRenderer {
      */
     @editable
     @visible(function (this: Label) { return this._enableShadow && !(this._font instanceof BitmapFont) && (this.cacheMode !== CacheMode.CHAR); })
-    @displayOrder(24)
+    @displayOrder(25)
     get shadowOffset (): Vec2 {
         return this._shadowOffset;
     }
@@ -712,7 +756,7 @@ export class Label extends UIRenderer {
      */
     @editable
     @visible(function (this: Label) { return this._enableShadow && !(this._font instanceof BitmapFont) && (this.cacheMode !== CacheMode.CHAR); })
-    @displayOrder(25)
+    @displayOrder(26)
     get shadowBlur (): number {
         return this._shadowBlur;
     }
@@ -820,6 +864,8 @@ export class Label extends UIRenderer {
     protected _isBold = false;
     @serializable
     protected _isUnderline = false;
+    @serializable
+    protected _underlineStyle = UnderlineStyle.SOLID;
     @serializable
     protected _underlineHeight = 2;
     @serializable
