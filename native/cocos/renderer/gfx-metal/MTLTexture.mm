@@ -131,11 +131,16 @@ void CCMTLTexture::doInit(const TextureInfo &info) {
         CC_ASSERT_EQ(cvret, kCVReturnSuccess); // Failed to create CoreVideo Metal texture from image.
 
         _mtlTexture = CVMetalTextureGetTexture(CVMTLTexture);
+        if (_mtlTexture) {
+            [_mtlTexture retain];
+        }
+        _allocateMemory = false;
 
         CFRelease(CVMTLTexture);
         CFRelease(CVMTLTextureCache);
 
         CC_ASSERT(_mtlTexture); // Failed to create Metal texture CoreVideo Metal Texture
+        return;
 #endif
     }
 
