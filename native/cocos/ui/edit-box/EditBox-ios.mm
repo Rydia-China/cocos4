@@ -64,6 +64,9 @@
 #define BUTTON_WIDTH                    60
 //TODO: change the proccedure of showing inputbox, possibly become a property
 const bool INPUTBOX_HIDDEN = true; // Toggle if Inputbox is visible
+// Lunaverse keeps the typed text rendered by Cocos and uses iOS only for keyboard input.
+// The stock accessory view duplicates the input field above the keyboard.
+const bool LUNAVERSE_ACCESSORY_INPUT_HIDDEN = true;
 /*************************************************************************
  Inner class declarations.
  ************************************************************************/
@@ -383,12 +386,26 @@ static EditboxManager *instance = nil;
                                                    safeView.size.width,
                                                    getTextInputHeight(g_isMultiline) + ITEM_MARGIN_HEIGHT)];
     [toolbar setBackgroundColor:[UIColor darkGrayColor]];
+    if (LUNAVERSE_ACCESSORY_INPUT_HIDDEN) {
+        UIImage *emptyToolbarImage = [[[UIImage alloc] init] autorelease];
+        toolbar.translucent = YES;
+        [toolbar setBackgroundImage:emptyToolbarImage forToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault];
+        [toolbar setShadowImage:emptyToolbarImage forToolbarPosition:UIBarPositionAny];
+        [toolbar setBackgroundColor:[UIColor clearColor]];
+    }
     
     UITextView* textView = [[UITextView alloc] init];
     textView.textColor = [UIColor blackColor];
     textView.backgroundColor = [UIColor whiteColor];
     textView.layer.cornerRadius = 5.0;
     textView.clipsToBounds = YES;
+    if (LUNAVERSE_ACCESSORY_INPUT_HIDDEN) {
+        [textView setFrame:CGRectMake(0, 0, 1, BUTTON_HEIGHT)];
+        textView.textColor = [UIColor clearColor];
+        textView.backgroundColor = [UIColor clearColor];
+        textView.tintColor = [UIColor clearColor];
+        textView.layer.cornerRadius = 0.0;
+    }
     textView.text = [NSString stringWithUTF8String:showInfo->defaultValue.c_str()];
     TextViewDelegate* delegate = [[TextViewDelegate alloc] initWithPairs:[inputbox inputOnView] and:textView];
     inputbox.inputDelegate = delegate;
@@ -414,11 +431,18 @@ static EditboxManager *instance = nil;
                   forState:UIControlStateHighlighted]; // Hight light state triggered when the button is tapped.
     UIBarButtonItem *confirm = [[UIBarButtonItem alloc]initWithCustomView:confirmBtn];
     
-    [toolbar setItems:@[textViewItem, confirm] animated:YES];
-    UIBarButtonItem* textViewBarButtonItem = [self setInputWidthOf:toolbar];
-    ((UITextView*)[inputbox inputOnView]).inputAccessoryView = toolbar;
-    
-    [inputbox setInputOnToolbar:textViewBarButtonItem.customView];
+    if (LUNAVERSE_ACCESSORY_INPUT_HIDDEN) {
+        UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        [toolbar setItems:@[textViewItem, flex, confirm] animated:YES];
+        ((UITextView*)[inputbox inputOnView]).inputAccessoryView = toolbar;
+        [inputbox setInputOnToolbar:textViewItem.customView];
+        [flex release];
+    } else {
+        [toolbar setItems:@[textViewItem, confirm] animated:YES];
+        UIBarButtonItem* textViewBarButtonItem = [self setInputWidthOf:toolbar];
+        ((UITextView*)[inputbox inputOnView]).inputAccessoryView = toolbar;
+        [inputbox setInputOnToolbar:textViewBarButtonItem.customView];
+    }
     //release for NON ARC ENV
     [toolbar release];
     [textView release];
@@ -436,11 +460,25 @@ static EditboxManager *instance = nil;
                                                    safeView.size.width,
                                                    TEXT_LINE_HEIGHT + ITEM_MARGIN_HEIGHT)];
     [toolbar setBackgroundColor:[UIColor darkGrayColor]];
+    if (LUNAVERSE_ACCESSORY_INPUT_HIDDEN) {
+        UIImage *emptyToolbarImage = [[[UIImage alloc] init] autorelease];
+        toolbar.translucent = YES;
+        [toolbar setBackgroundImage:emptyToolbarImage forToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault];
+        [toolbar setShadowImage:emptyToolbarImage forToolbarPosition:UIBarPositionAny];
+        [toolbar setBackgroundColor:[UIColor clearColor]];
+    }
     
     UITextField* textField = [[UITextField alloc] init];
     textField.borderStyle = UITextBorderStyleRoundedRect;
     textField.textColor = [UIColor blackColor];
     textField.backgroundColor = [UIColor whiteColor];
+    if (LUNAVERSE_ACCESSORY_INPUT_HIDDEN) {
+        [textField setFrame:CGRectMake(0, 0, 1, BUTTON_HEIGHT)];
+        textField.borderStyle = UITextBorderStyleNone;
+        textField.textColor = [UIColor clearColor];
+        textField.backgroundColor = [UIColor clearColor];
+        textField.tintColor = [UIColor clearColor];
+    }
     textField.text = [NSString stringWithUTF8String:showInfo->defaultValue.c_str()];
     TextFieldDelegate* delegate = [[TextFieldDelegate alloc] initWithPairs:[inputbox inputOnView] and:textField];
     textField.delegate = delegate;
@@ -467,12 +505,18 @@ static EditboxManager *instance = nil;
                   forState:UIControlStateHighlighted]; // Hight light state triggered when the button is tapped.
     UIBarButtonItem *confirm = [[UIBarButtonItem alloc]initWithCustomView:confirmBtn];
     
-    [toolbar setItems:@[textFieldItem, confirm] animated:YES];
-    
-    
-    UIBarButtonItem* textFieldBarButtonItem = [self setInputWidthOf:toolbar];
-    ((UITextField*)[inputbox inputOnView]).inputAccessoryView = toolbar;
-    [inputbox setInputOnToolbar:textFieldBarButtonItem.customView];
+    if (LUNAVERSE_ACCESSORY_INPUT_HIDDEN) {
+        UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        [toolbar setItems:@[textFieldItem, flex, confirm] animated:YES];
+        ((UITextField*)[inputbox inputOnView]).inputAccessoryView = toolbar;
+        [inputbox setInputOnToolbar:textFieldItem.customView];
+        [flex release];
+    } else {
+        [toolbar setItems:@[textFieldItem, confirm] animated:YES];
+        UIBarButtonItem* textFieldBarButtonItem = [self setInputWidthOf:toolbar];
+        ((UITextField*)[inputbox inputOnView]).inputAccessoryView = toolbar;
+        [inputbox setInputOnToolbar:textFieldBarButtonItem.customView];
+    }
     
     //release for NON ARC ENV
     [toolbar release];
@@ -495,12 +539,14 @@ static EditboxManager *instance = nil;
                                  viewRect.size.height - showInfo->y - showInfo->height,
                                  showInfo->width,
                                  showInfo->height)];
-        CGRect safeArea = getSafeAreaRect();
-        [[[ret inputOnView] inputAccessoryView] setFrame:CGRectMake(0,
-                                                                           0,
-                                                                           safeArea.size.width,
-                                                                    getTextInputHeight(g_isMultiline) + ITEM_MARGIN_HEIGHT)];
-        [self setInputWidthOf:[[ret inputOnView] inputAccessoryView] ];
+        if (!LUNAVERSE_ACCESSORY_INPUT_HIDDEN) {
+            CGRect safeArea = getSafeAreaRect();
+            [[[ret inputOnView] inputAccessoryView] setFrame:CGRectMake(0,
+                                                                               0,
+                                                                               safeArea.size.width,
+                                                                        getTextInputHeight(g_isMultiline) + ITEM_MARGIN_HEIGHT)];
+            [self setInputWidthOf:[[ret inputOnView] inputAccessoryView] ];
+        }
     } else {
         ret = [[InputBoxPair alloc] init];
         [ret setInputOnView:[[UITextView alloc]
@@ -527,12 +573,14 @@ static EditboxManager *instance = nil;
                                  viewRect.size.height - showInfo->y - showInfo->height,
                                  showInfo->width,
                                  showInfo->height)];
-        CGRect safeArea = getSafeAreaRect();
-        [[[ret inputOnView] inputAccessoryView] setFrame:CGRectMake(0,
-                                                                           0,
-                                                                    safeArea.size.width,
-                                                                    getTextInputHeight(g_isMultiline) + ITEM_MARGIN_HEIGHT)];
-        [self setInputWidthOf:[[ret inputOnView] inputAccessoryView] ];
+        if (!LUNAVERSE_ACCESSORY_INPUT_HIDDEN) {
+            CGRect safeArea = getSafeAreaRect();
+            [[[ret inputOnView] inputAccessoryView] setFrame:CGRectMake(0,
+                                                                               0,
+                                                                        safeArea.size.width,
+                                                                        getTextInputHeight(g_isMultiline) + ITEM_MARGIN_HEIGHT)];
+            [self setInputWidthOf:[[ret inputOnView] inputAccessoryView] ];
+        }
     } else {
         ret = [[InputBoxPair alloc] init];
         [ret setInputOnView:[[UITextField alloc]
@@ -544,10 +592,10 @@ static EditboxManager *instance = nil;
         [self addInputAccessoryViewForTextField:ret with:showInfo];
     }
     ((UITextField*)[ret inputOnToolbar]).text = [NSString stringWithUTF8String:showInfo->defaultValue.c_str()];
-    ((UITextField*)[ret inputOnView]).text = [NSString stringWithUTF8String:showInfo->defaultValue.c_str()];
     setTextFieldReturnType((UITextField*)[ret inputOnToolbar], showInfo->confirmType);
-    setTextFieldReturnType((UITextField*)[ret inputOnView], showInfo->confirmType);
     setTextFieldKeyboardType((UITextField*)[ret inputOnToolbar], showInfo->inputType);
+    ((UITextField*)[ret inputOnView]).text = [NSString stringWithUTF8String:showInfo->defaultValue.c_str()];
+    setTextFieldReturnType((UITextField*)[ret inputOnView], showInfo->confirmType);
     setTextFieldKeyboardType((UITextField*)[ret inputOnView], showInfo->inputType);
     return ret;
 }
@@ -564,6 +612,7 @@ static EditboxManager *instance = nil;
         curView = [self createTextField:showInfo];
     }
     [[curView inputOnView] setHidden:INPUTBOX_HIDDEN];
+    [[curView inputOnView] setAlpha:1.0];
     UIView *view = UIApplication.sharedApplication.delegate.window.rootViewController.view;
     
     [view addSubview:[curView inputOnView]];
@@ -577,12 +626,16 @@ static EditboxManager *instance = nil;
 }
 // Change the focus point to the TextField or TextView on the toolbar.
 - (void) hide {
+   if (!curView) {
+       return;
+   }
    if ([[curView inputOnToolbar] isFirstResponder]) {
        [[curView inputOnToolbar] resignFirstResponder];
    }
    if ([[curView inputOnView] isFirstResponder]) {
        [[curView inputOnView] resignFirstResponder];
    }
+   [[curView inputOnView] setAlpha:1.0];
    [[curView inputOnView] removeFromSuperview];
 }
 
@@ -590,8 +643,12 @@ static EditboxManager *instance = nil;
     return curView;
 }
 - (NSString*) getCurrentText {
-    if (g_isMultiline)
+    if (!curView) {
+        return @"";
+    }
+    if (g_isMultiline) {
         return [(UITextView*)[curView inputOnToolbar] text];
+    }
     return [(UITextField*)[curView inputOnToolbar] text];
 }
 
