@@ -80,15 +80,6 @@ type ReverseIndex = number;
 // Used to index the current object
 type InstanceBnotReverseIndex = Bnot<InstanceIndex, ReverseIndex>;
 
-// shared with the editor
-export declare namespace deserialize.Internal {
-    export type SharedString_ = SharedString;
-    export type Empty_ = Empty;
-    export type StringIndex_ = StringIndex;
-    export type InstanceIndex_ = InstanceIndex;
-    export type StringIndexBnotNumber_ = StringIndexBnotNumber;
-}
-
 const enum DataTypeID {
 
     // Fields that can be assigned directly, can be values in any JSON, or even a complex JSON array, object (no type).
@@ -143,11 +134,6 @@ const enum DataTypeID {
     ARRAY_LENGTH,
 }
 
-export declare namespace deserialize.Internal {
-    export import DataTypeID_ = DataTypeID;
-    export type DataTypes_ = DataTypes;
-}
-
 interface DataTypes {
     // eslint-disable-next-line @typescript-eslint/ban-types
     [DataTypeID.SimpleType]: number | string | boolean | null | object;
@@ -196,13 +182,6 @@ export interface CCClassConstructor<T> extends Ctor<T> {
 type AnyCtor = Ctor<Object>;
 // eslint-disable-next-line @typescript-eslint/ban-types
 type AnyCCClass = CCClassConstructor<Object>;
-
-export declare namespace deserialize.Internal {
-    export type AnyData_ = AnyData;
-    export type OtherObjectData_ = OtherObjectData;
-    export type OtherObjectTypeID_ = OtherObjectTypeID;
-    export type AnyCCClass_ = AnyCCClass;
-}
 
 /**
  * If the value type is different, different Classes will be generated
@@ -287,17 +266,6 @@ type IArrayData = [
     // types
     ...DataTypeID[]
 ];
-
-export declare namespace deserialize.Internal {
-    export type IClass_ = IClass;
-    export type IMask_ = IMask;
-    export type IClassObjectData_ = IClassObjectData;
-    export type ICustomObjectDataContent_ = ICustomObjectDataContent;
-    export type ICustomObjectData_ = ICustomObjectData;
-    export type ITRSData_ = ITRSData;
-    export type IDictData_ = IDictData;
-    export type IArrayData_ = IArrayData;
-}
 
 const enum Refs {
     EACH_RECORD_LENGTH = 3,
@@ -406,14 +374,6 @@ type IPackedFileData = [
 
     sections: IPackedFileSection[],
 ];
-
-export declare namespace deserialize.Internal {
-    export import Refs_ = Refs;
-    export type IRefs_ = IRefs;
-    export import File_ = File;
-    export type IFileData_ = IFileData;
-    export type IPackedFileData_ = IPackedFileData;
-}
 
 interface ICustomHandler {
     result: Details,
@@ -983,6 +943,36 @@ export function deserialize (data: IDeserializeInput | string | any, details?: D
 }
 
 export declare namespace deserialize {
+    // Shared with the editor. Keep these declarations in one namespace block:
+    // the declaration bundler emits invalid forward namespace statements when
+    // a function namespace is reopened through a package-qualified engine path.
+    export namespace Internal {
+        export type SharedString_ = SharedString;
+        export type Empty_ = Empty;
+        export type StringIndex_ = StringIndex;
+        export type InstanceIndex_ = InstanceIndex;
+        export type StringIndexBnotNumber_ = StringIndexBnotNumber;
+        export import DataTypeID_ = DataTypeID;
+        export type DataTypes_ = DataTypes;
+        export type AnyData_ = AnyData;
+        export type OtherObjectData_ = OtherObjectData;
+        export type OtherObjectTypeID_ = OtherObjectTypeID;
+        export type AnyCCClass_ = AnyCCClass;
+        export type IClass_ = IClass;
+        export type IMask_ = IMask;
+        export type IClassObjectData_ = IClassObjectData;
+        export type ICustomObjectDataContent_ = ICustomObjectDataContent;
+        export type ICustomObjectData_ = ICustomObjectData;
+        export type ITRSData_ = ITRSData;
+        export type IDictData_ = IDictData;
+        export type IArrayData_ = IArrayData;
+        export import Refs_ = Refs;
+        export type IRefs_ = IRefs;
+        export import File_ = File;
+        export type IFileData_ = IFileData;
+        export type IPackedFileData_ = IPackedFileData;
+    }
+
     export type SerializableClassConstructor = new () => unknown;
 
     export type ReportMissingClass = (id: string) => void;
