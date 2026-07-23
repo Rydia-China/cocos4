@@ -22,7 +22,7 @@ export { PoseGraphType };
 
 const POSE_NODE_OUTPUT_BINDING_KEY = 0;
 
-export function getInputKeys (node: PoseGraphNode) {
+export function getInputKeys (node: PoseGraphNode): readonly PoseGraphInputKey[] {
     return globalPoseGraphNodeInputManager.getInputKeys(node);
 }
 
